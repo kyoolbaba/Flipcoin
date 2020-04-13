@@ -8,6 +8,9 @@ declare -A triplet=( ["HHH"]=0 ["HHT"]=0 ["HTH"]=0 ["THH"]=0 \
           ["HTT"]=0 ["TTT"]=0 ["TTH"]=0 ["THT"]=0 )
 declare -A tripletpercentage=( ["HHH"]=0 ["HHT"]=0 ["HTH"]=0 ["THH"]=0 \
           ["HTT"]=0 ["TTT"]=0 ["TTH"]=0 ["THT"]=0 )
+declare MAXTRIPLET=0
+declare MAXDOUBLET=0
+
 singlets(){
     for (( i = 0 ; i < $1 ; i++ ))  ; do
         if [[ $((RANDOM%2)) -eq '1' ]]; then
@@ -34,15 +37,24 @@ doublets(){
         fi
         previous=$present
         done
-
+total=$((total + 1))
 hh=${doublet[HH]}
 doubletpercentage[HH]=$(((hh * 100)/total))
 ht=${doublet[HT]}
-doubletpercentage[HH]=$(((ht * 100)/total))
+doubletpercentage[HT]=$(((ht * 100)/total))
 th=${doublet[TH]}
-doubletpercentage[HH]=$(((th * 100)/total))
+doubletpercentage[TH]=$(((th * 100)/total))
 tt=${doublet[TT]}
-doubletpercentage[HH]=$(((tt * 100)/total))
+doubletpercentage[TT]=$(((tt * 100)/total))
+
+max=0
+for i in ${!doublet[@]}; do
+
+    if [[ $max -le ${doublet[$i]} ]]; then
+         max=${doublet[$i]} 
+         MAXDOUBLET=$i
+    fi
+done
  }
 
  triplets(){
@@ -72,7 +84,7 @@ doubletpercentage[HH]=$(((tt * 100)/total))
         previous2=$previous1
         previous1=$present
         done
-
+total=$((total + 2))
 hhh=${triplet[HHH]}
 tripletpercentage[HHH]=$(((hhh * 100)/total))
 hht=${triplet[HHT]}
@@ -89,18 +101,27 @@ tht=${triplet[THT]}
 tripletpercentage[THT]=$(((tht * 100)/total))
 ttt=${triplet[TTT]}
 tripletpercentage[TTT]=$(((ttt * 100)/total))
+max=0
+for i in ${!triplet[@]}; do
 
-
+    if [[ $max < ${triplet[$i]} ]]; then
+         max=${triplet[$i]} 
+         MAXTRIPLET=$i
+    fi
+done
  }
+ echo $MAX1
 
 #Calling method to find the singlets
 singlets $flips
 
 #Calling method to find the combination of doublets
-doublets $flips
+doublets $((flips - 1))
 
 #calling method to find the combination of triplets
-triplets $flips
+triplets $((flips - 2 ))
+
+
 
 
 
