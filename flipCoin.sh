@@ -10,7 +10,14 @@ declare -A tripletpercentage=( ["HHH"]=0 ["HHT"]=0 ["HTH"]=0 ["THH"]=0 \
           ["HTT"]=0 ["TTT"]=0 ["TTH"]=0 ["THT"]=0 )
 declare MAXTRIPLET=0
 declare MAXDOUBLET=0
+declare tripletsort
+declare doubletsort
+#METHOD FOR SORTING DICTIONARY
+Sort(){
+  printf '%s\n' "$@" | sort -n 
+}
 
+#METHOD FOR SINGLET
 singlets(){
     for (( i = 0 ; i < $1 ; i++ ))  ; do
         if [[ $((RANDOM%2)) -eq '1' ]]; then
@@ -21,6 +28,7 @@ singlets(){
     done
  }
 
+# METHOD FOR DOUBLET 
 doublets(){
     total=$1
      local previous=$((RANDOM%2))
@@ -37,6 +45,7 @@ doublets(){
         fi
         previous=$present
         done
+#FINDING OUT PERCENTAGE OF COMBINATION
 total=$((total + 1))
 hh=${doublet[HH]}
 doubletpercentage[HH]=$(((hh * 100)/total))
@@ -47,9 +56,26 @@ doubletpercentage[TH]=$(((th * 100)/total))
 tt=${doublet[TT]}
 doubletpercentage[TT]=$(((tt * 100)/total))
 
+#CALLING SORT FUNCTION TO SORT 
+dsort=$(Sort ${doublet[@]})
+
+#SORTING
+check=""
+for j in ${dsort[@]} ;do    
+    for i in ${!doublet[@]}; do
+         if [[ $j -eq ${doublet[$i]} && $check != $i  ]]; then
+             doubletsort[((count++))]=$i
+             check=$i
+             break
+        fi
+    done
+done 
+
+
+
+#FINDING OUT MAXIMUM OCCURED COMBINATION
 max=0
 for i in ${!doublet[@]}; do
-
     if [[ $max -le ${doublet[$i]} ]]; then
          max=${doublet[$i]} 
          MAXDOUBLET=$i
@@ -57,6 +83,7 @@ for i in ${!doublet[@]}; do
 done
  }
 
+#METHOD FOR TRIPLETS
  triplets(){
      total=$1
      local previous2=$((RANDOM%2))
@@ -84,6 +111,7 @@ done
         previous2=$previous1
         previous1=$present
         done
+#FINDING OUT PERCENTAGE OF COMBINATION
 total=$((total + 2))
 hhh=${triplet[HHH]}
 tripletpercentage[HHH]=$(((hhh * 100)/total))
@@ -101,16 +129,34 @@ tht=${triplet[THT]}
 tripletpercentage[THT]=$(((tht * 100)/total))
 ttt=${triplet[TTT]}
 tripletpercentage[TTT]=$(((ttt * 100)/total))
+
+#CALLING SORT FUNCTION TO SORT 
+tsort=$(Sort ${triplet[@]})
+
+#SORTING
+check=""
+for j in ${tsort[@]} ;do    
+
+    for i in ${!triplet[@]}; do
+        if [[ $j -eq ${triplet[$i]} && $check != $i  ]]; then
+             tripletsort[((count++))]=$i
+             check=$i
+            break
+         fi
+    done
+done 
+
+#FINDING OUT MAXIMUM OCCURED COMBINATION
 max=0
 for i in ${!triplet[@]}; do
-
     if [[ $max < ${triplet[$i]} ]]; then
          max=${triplet[$i]} 
          MAXTRIPLET=$i
     fi
 done
  }
- echo $MAX1
+
+
 
 #Calling method to find the singlets
 singlets $flips
@@ -120,10 +166,6 @@ doublets $((flips - 1))
 
 #calling method to find the combination of triplets
 triplets $((flips - 2 ))
-
-
-
-
 
 
  
