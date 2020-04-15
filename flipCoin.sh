@@ -1,172 +1,54 @@
 #!/bin/bash
 echo Enter the number of flips
 read flips
-declare  -A singlet=(['HEAD']=0 ['TAIL']=0 )
-declare -A doublet=( ["HH"]=0 ["TH"]=0 ["TH"]=0 ["TT"]=0 )
-declare -A doubletpercentage=( ["HH"]=0 ["TH"]=0 ["TH"]=0 ["TT"]=0 )
-declare -A triplet=( ["HHH"]=0 ["HHT"]=0 ["HTH"]=0 ["THH"]=0 \
-          ["HTT"]=0 ["TTT"]=0 ["TTH"]=0 ["THT"]=0 )
-declare -A tripletpercentage=( ["HHH"]=0 ["HHT"]=0 ["HTH"]=0 ["THH"]=0 \
-          ["HTT"]=0 ["TTT"]=0 ["TTH"]=0 ["THT"]=0 )
-declare MAXTRIPLET=0
-declare MAXDOUBLET=0
-declare tripletsort
-declare doubletsort
-#METHOD FOR SORTING DICTIONARY
+read combination
+declare -A let
+declare -A sortedCombinationValues
+
+#METHOD FOR SORTING
 Sort(){
   printf '%s\n' "$@" | sort -n 
 }
 
 #METHOD FOR SINGLET
-singlets(){
+main(){
     for (( i = 0 ; i < $1 ; i++ ))  ; do
         if [[ $((RANDOM%2)) -eq '1' ]]; then
-            ((singlet[HEAD]++))
+            coin[((count++))]=H
         else
-            ((singlet[TAIL]++))
+            coin[((count++))]=T
         fi
     done
  }
 
-# METHOD FOR DOUBLET 
-doublets(){
-    total=$1
-     local previous=$((RANDOM%2))
-        for (( i = 0 ; i < $((total -1)) ; i++ ))  ; do
-            local present=$((RANDOM%2))
-             if [[ $previous -eq '1' && $present -eq '1' ]]; then
-                 ((doublet[HH]++))
-            elif [[ $previous -eq '1' && $present -eq '0' ]]; then
-                 ((doublet[HT]++))
-            elif [[ $previous -eq '0' && $present -eq '1' ]]; then
-                 ((doublet[TH]++))
-             else
-                ((doublet[TT]++))
-        fi
-        previous=$present
+# METHOD TO CREATE ANY NUMBER OF COMBINATIONS 
+#(LIKE SINGLET DOUBLET TRIPLET OR 4 OR 5 OR EVEN MORE COMBINATIONS IF YOU WANT) 
+lets(){
+    f=$1
+    c=$2
+    for (( i = 0; i < $((f - c))  ; i++ )); do
+    combi=""
+        for (( j = $i ; j < $((c + i)) ; j++)); do
+        combi="$combi${coin[j]}" 
         done
-#FINDING OUT PERCENTAGE OF COMBINATION
-total=$((total + 1))
-hh=${doublet[HH]}
-doubletpercentage[HH]=$(((hh * 100)/total))
-ht=${doublet[HT]}
-doubletpercentage[HT]=$(((ht * 100)/total))
-th=${doublet[TH]}
-doubletpercentage[TH]=$(((th * 100)/total))
-tt=${doublet[TT]}
-doubletpercentage[TT]=$(((tt * 100)/total))
+        (('let[$combi]++'))
+        combine[((count++))]=$combi
+    
+    done 
+    #CALLING METHOD TO SORT THE DICTIONARY WITH RESPECT TO VALUES
+    sortedCombinationValues=$(Sort ${let[@]})
 
-#CALLING SORT FUNCTION TO SORT 
-dsort=$(Sort ${doublet[@]})
 
-#SORTING
-check=""
-for j in ${dsort[@]} ;do    
-    for i in ${!doublet[@]}; do
-         if [[ $j -eq ${doublet[$i]} && $check != $i  ]]; then
-             doubletsort[((count++))]=$i
-             check=$i
-             break
-        fi
-    done
-done 
+}
+
+main $flips
+echo ${coin[@]}
+lets $flips $combination
+# TO CHECK THE OUTPUT UNCOMMENT THE BELOW TWO LINES
+#echo ${let[@]}
+#echo ${!let[@]}
+#echo ${sortedCombinationValues[@]}
 
 
 
-#FINDING OUT MAXIMUM OCCURED COMBINATION
-max=0
-for i in ${!doublet[@]}; do
-    if [[ $max -le ${doublet[$i]} ]]; then
-         max=${doublet[$i]} 
-         MAXDOUBLET=$i
-    fi
-done
- }
 
-#METHOD FOR TRIPLETS
- triplets(){
-     total=$1
-     local previous2=$((RANDOM%2))
-     local previous1=$((RANDOM%2))
-       for (( i = 0 ; i < $1 ; i++ )); do
-            local present=$((RANDOM%2))
-             if [[ $previous2 -eq '1' && $previous1 -eq '1' && $present -eq '1' ]]; then
-                 ((triplet[HHH]++))
-            elif [[ $previous2 -eq '1' && $previous1 -eq '1' && $present -eq '0' ]]; then
-                 ((triplet[HHT]++))
-            elif [[ $previous2 -eq '1' && $previous1 -eq '0' && $present -eq '1' ]]; then
-                 ((triplet[HTH]++))
-            elif [[ $previous2 -eq '0' && $previous1 -eq '1' && $present -eq '1' ]]; then
-                 ((triplet[THH]++))
-            elif [[ $previous2 -eq '1' && $previous1 -eq '0' && $present -eq '0' ]]; then
-                 ((triplet[HTT]++))
-            elif [[ $previous2 -eq '0' && $previous1 -eq '1' && $present -eq '0' ]]; then
-                 ((triplet[THT]++))
-            elif [[ $previous2 -eq '0' && $previous1 -eq '0' && $present -eq '1' ]]; then
-                 ((triplet[TTH]++))
-            elif [[ $previous2 -eq '0' && $previous1 -eq '0' && $present -eq '0' ]]; then
-                ((triplet[TTT]++))
-        fi
-        echo $previous2 $previous1 $present 
-        previous2=$previous1
-        previous1=$present
-        done
-#FINDING OUT PERCENTAGE OF COMBINATION
-total=$((total + 2))
-hhh=${triplet[HHH]}
-tripletpercentage[HHH]=$(((hhh * 100)/total))
-hht=${triplet[HHT]}
-tripletpercentage[HHT]=$(((hht * 100)/total))
-thh=${triplet[THH]}
-tripletpercentage[THH]=$(((thh * 100)/total))
-hth=${triplet[HTH]}
-tripletpercentage[HTH]=$(((hth * 100)/total))
-tth=${triplet[TTH]}
-tripletpercentage[TTH]=$(((tth * 100)/total))
-htt=${triplet[HTT]}
-tripletpercentage[HTT]=$(((htt * 100)/total))
-tht=${triplet[THT]}
-tripletpercentage[THT]=$(((tht * 100)/total))
-ttt=${triplet[TTT]}
-tripletpercentage[TTT]=$(((ttt * 100)/total))
-
-#CALLING SORT FUNCTION TO SORT 
-tsort=$(Sort ${triplet[@]})
-
-#SORTING
-check=""
-for j in ${tsort[@]} ;do    
-
-    for i in ${!triplet[@]}; do
-        if [[ $j -eq ${triplet[$i]} && $check != $i  ]]; then
-             tripletsort[((count++))]=$i
-             check=$i
-            break
-         fi
-    done
-done 
-
-#FINDING OUT MAXIMUM OCCURED COMBINATION
-max=0
-for i in ${!triplet[@]}; do
-    if [[ $max < ${triplet[$i]} ]]; then
-         max=${triplet[$i]} 
-         MAXTRIPLET=$i
-    fi
-done
- }
-
-
-
-#Calling method to find the singlets
-singlets $flips
-
-#Calling method to find the combination of doublets
-doublets $((flips - 1))
-
-#calling method to find the combination of triplets
-triplets $((flips - 2 ))
-
-
- 
- 
